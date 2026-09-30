@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday Nishmi! ❤️</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+    <!-- Canvas Confetti Library -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        :root {
+            --font-code: 'Fira Code', monospace;
+            --font-sans: 'Inter', sans-serif;
+            --font-cursive: 'Dancing Script', cursive;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background-color: #0d0e15;
+            color: #e2e8f0;
+            overflow-x: hidden;
+        }
+
+        .font-code { font-family: var(--font-code); }
+        .font-cursive { font-family: var(--font-cursive); }
+
+        /* Minimal Glass Panel */
+        .glass-card {
+            background: rgba(22, 24, 37, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .glass-card-hover {
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .glass-card-hover:hover {
+            border-color: rgba(244, 114, 182, 0.35);
+            transform: translateY(-2px);
+        }
+
+        /* Synchronized Code & Translation Highlighting */
+        .sync-item {
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border-left: 3px solid transparent;
+        }
+
+        .sync-item:hover, .sync-item.active-sync {
+            background: rgba(244, 114, 182, 0.12);
+            border-left-color: #ec4899;
+            border-radius: 0 0.5rem 0.5rem 0;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0d0e15;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #26293b;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #ec4899;
+        }
+
+        /* Sound Wave Bar Animation */
+        @keyframes soundWave {
+            0%, 100% { height: 4px; }
+            50% { height: 16px; }
+        }
+        .wave-bar {
+            width: 3px;
+            background-color: #ec4899;
+            border-radius: 2px;
+            animation: soundWave 1.2s ease-in-out infinite;
+        }
+        .wave-bar:nth-child(1) { animation-delay: 0.0s; }
+        .wave-bar:nth-child(2) { animation-delay: 0.2s; }
+        .wave-bar:nth-child(3) { animation-delay: 0.4s; }
+        .wave-bar:nth-child(4) { animation-delay: 0.1s; }
+        .wave-paused {
+            animation-play-state: paused !important;
+            height: 4px !important;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-pink-500 selection:text-white">
+
+    <!-- Floating Background Canvas for Subtle Hearts -->
+    <canvas id="bgCanvas" class="fixed inset-0 pointer-events-none z-0"></canvas>
+
+    <!-- Header / Navbar -->
+    <header class="relative z-10 w-full border-b border-white/10 glass-card sticky top-0">
+        <div class="max-w-6xl mx-auto px-4 py-3.5 flex flex-col sm:flex-row items-center justify-between gap-3">
+            
+            <div class="flex items-center space-x-3">
+                <div class="w-9 h-9 rounded-xl bg-pink-500/10 border border-pink-500/30 flex items-center justify-center text-pink-400">
+                    <i class="fa-solid fa-code text-sm"></i>
+                </div>
+                <div>
+                    <h1 class="text-base font-bold text-white tracking-tight flex items-center gap-2">
+                        Happy Birthday, Nishmi! <span class="text-pink-500 text-sm">❤️</span>
+                    </h1>
+                    <p class="text-[11px] text-slate-400 font-mono">// Happy Birthday My Love</p>
+                </div>
+            </div>
+
+            <!-- Music Player Controls -->
+            <div class="flex items-center gap-3 bg-black/40 border border-white/10 px-3 py-1.5 rounded-full">
+                <button id="playBtn" onclick="toggleAudio()" class="w-7 h-7 rounded-full bg-pink-500/20 hover:bg-pink-500/40 text-pink-300 flex items-center justify-center transition cursor-pointer">
+                    <i id="playIcon" class="fa-solid fa-play text-xs"></i>
+                </button>
+                <div class="flex flex-col">
+                    <span class="text-[11px] font-medium text-slate-200 leading-none">love_theme.mp3</span>
+                    <span id="audioStatus" class="text-[9px] text-slate-400 font-mono mt-0.5">Click play</span>
+                </div>
+                <!-- Equalizer animation -->
+                <div class="flex items-end gap-0.5 h-4 px-1">
+                    <div class="wave-bar wave-paused"></div>
+                    <div class="wave-bar wave-paused"></div>
+                    <div class="wave-bar wave-paused"></div>
+                    <div class="wave-bar wave-paused"></div>
+                </div>
+                <audio id="bgAudio" loop src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3"></audio>
+            </div>
+
+        </div>
+    </header>
+
+    <main class="relative z-10 max-w-6xl w-full mx-auto px-4 py-6 space-y-8 flex-grow">
+
+        <!-- Clean Hero Banner -->
+        <section class="glass-card rounded-2xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 border-l-4 border-l-pink-500">
+            <div class="space-y-2 text-center md:text-left">
+                <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-[11px] font-mono bg-pink-500/10 text-pink-300 border border-pink-500/20">
+                    <i class="fa-solid fa-sparkles text-[10px]"></i> Girlfriend Special Edition
+                </div>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-white tracking-tight">
+                    Code Written From My Heart 💕
+                </h2>
+                <p class="text-slate-300 text-sm max-w-2xl leading-relaxed">
+                    I translated my deepest thoughts for you into code. Click on any line of code below to highlight its plain English translation!
+                </p>
+            </div>
+
+            <button onclick="triggerLoveProgram()" class="px-5 py-3 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white text-sm font-semibold rounded-xl shadow-lg transition transform hover:scale-[1.02] active:scale-95 flex items-center gap-2.5 cursor-pointer whitespace-nowrap">
+                <i class="fa-solid fa-heart text-xs"></i>
+                <span>Run Love Program</span>
+            </button>
+        </section>
+
+        <!-- Code & Translation Side-by-Side View -->
+        <section class="space-y-3">
+            
+            <!-- Mobile Tab View Toggle Buttons -->
+            <div class="flex sm:hidden bg-slate-900/80 p-1 rounded-xl border border-white/10 text-xs font-mono">
+                <button id="tabCodeBtn" onclick="switchMobileTab('code')" class="flex-1 py-2 text-center rounded-lg bg-pink-500/20 text-pink-300 font-semibold transition">
+                    <i class="fa-solid fa-code mr-1"></i> Code
+                </button>
+                <button id="tabTextBtn" onclick="switchMobileTab('text')" class="flex-1 py-2 text-center rounded-lg text-slate-400 font-semibold transition">
+                    <i class="fa-solid fa-heart mr-1"></i> Translation
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                
+                <!-- LEFT: The Developer Side -->
+                <div id="codeTabContainer" class="glass-card rounded-2xl overflow-hidden flex flex-col">
+                    <div class="bg-black/40 px-4 py-2.5 border-b border-white/10 flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-red-500/80 inline-block"></span>
+                            <span class="w-2.5 h-2.5 rounded-full bg-yellow-500/80 inline-block"></span>
+                            <span class="w-2.5 h-2.5 rounded-full bg-green-500/80 inline-block"></span>
+                            <span class="text-xs font-code text-slate-400 ml-1">nishmi_love_logic.py</span>
+                        </div>
+                        <span class="text-[10px] font-mono text-pink-400 bg-pink-500/10 px-2 py-0.5 rounded border border-pink-500/20">The Developer Side</span>
+                    </div>
+
+                    <div class="p-3 font-code text-xs md:text-sm leading-relaxed space-y-2 overflow-y-auto">
+                        
+                        <!-- Line 1 -->
+                        <div class="sync-item p-2.5 rounded-lg" onclick="syncHighlight(1)" onmouseenter="syncHighlight(1)" id="code-line-1">
+                            <span class="text-purple-400">def</span> <span class="text-blue-400">calculate_happiness</span>(presence):<br>
+                            &nbsp;&nbsp;<span class="text-pink-400">if</span> presence == <span class="text-emerald-400">"Nishmi"</span>:<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-purple-400">return</span> <span class="text-yellow-300">float</span>(<span class="text-emerald-400">'inf'</span>)
+                        </div>
+
+                        <!-- Line 2 -->
+                        <div class="sync-item p-2.5 rounded-lg" onclick="syncHighlight(2)" onmouseenter="syncHighlight(2)" id="code-line-2">
+                            <span class="text-purple-400">while</span> heart.<span class="text-blue-400">is_beating</span>():<br>
+                            &nbsp;&nbsp;love_nishmi()<br>
+                            &nbsp;&nbsp;protect_her_smile()
+                        </div>
+
+                        <!-- Line 3 -->
+                        <div class="sync-item p-2.5 rounded-lg" onclick="syncHighlight(3)" onmouseenter="syncHighlight(3)" id="code-line-3">
+                            <span class="text-purple-400">try</span>:<br>
+                            &nbsp;&nbsp;find_someone_better(<span class="text-emerald-400">"Nishmi"</span>)<br>
+                            <span class="text-purple-400">except</span> <span class="text-yellow-300">ImpossibleError</span>:<br>
+                            &nbsp;&nbsp;<span class="text-blue-400">print</span>(<span class="text-emerald-400">"She is 1 in a billion!"</span>)
+                        </div>
+
+                        <!-- Line 4 -->
+                        <div class="sync-item p-2.5 rounded-lg" onclick="syncHighlight(4)" onmouseenter="syncHighlight(4)" id="code-line-4">
+                            <span class="text-purple-400">const</span> future_plan = {<br>
+                            &nbsp;&nbsp;destination: <span class="text-emerald-400">"Everywhere with Nishmi"</span>,<br>
+                            &nbsp;&nbsp;forever_together: <span class="text-yellow-300">True</span><br>
+                            }
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- RIGHT: The Plain English Translation -->
+                <div id="textTabContainer" class="glass-card rounded-2xl overflow-hidden flex flex-col hidden sm:flex">
+                    <div class="bg-black/40 px-4 py-2.5 border-b border-white/10 flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <i class="fa-solid fa-heart text-pink-400 text-xs"></i>
+                            <span class="text-xs font-medium text-slate-300">Heart Translator</span>
+                        </div>
+                        <span class="text-[10px] font-mono text-purple-300 bg-purple-500/10 px-2 py-0.5 rounded border border-purple-500/20">Plain English</span>
+                    </div>
+
+                    <div class="p-3 text-xs md:text-sm leading-relaxed space-y-2 overflow-y-auto">
+                        
+                        <!-- Explanation 1 -->
+                        <div class="sync-item p-2.5 rounded-lg" onclick="syncHighlight(1)" onmouseenter="syncHighlight(1)" id="text-line-1">
+                            <h4 class="text-pink-400 font-semibold mb-1 flex items-center gap-1.5">
+                                <i class="fa-solid fa-face-smile text-xs"></i> Infinite Joy
+                            </h4>
+                            <p class="text-slate-300 text-xs leading-normal">
+                                My happiness becomes infinite the exact moment you enter the room.
+                            </p>
+                        </div>
+
+                        <!-- Explanation 2 -->
+                        <div class="sync-item p-2.5 rounded-lg" onclick="syncHighlight(2)" onmouseenter="syncHighlight(2)" id="text-line-2">
+                            <h4 class="text-purple-300 font-semibold mb-1 flex items-center gap-1.5">
+                                <i class="fa-solid fa-infinity text-xs"></i> Non-Stop Care
+                            </h4>
+                            <p class="text-slate-300 text-xs leading-normal">
+                                As long as my heart beats, loving you and making you smile will be my top goal every day.
+                            </p>
+                        </div>
+
+                        <!-- Explanation 3 -->
+                        <div class="sync-item p-2.5 rounded-lg" onclick="syncHighlight(3)" onmouseenter="syncHighlight(3)" id="text-line-3">
+                            <h4 class="text-pink-400 font-semibold mb-1 flex items-center gap-1.5">
+                                <i class="fa-solid fa-gem text-xs"></i> Simply Irreplaceable
+                            </h4>
+                            <p class="text-slate-300 text-xs leading-normal">
+                                Searching for anyone better than you is mathematically impossible. You are perfect.
+                            </p>
+                        </div>
+
+                        <!-- Explanation 4 -->
+                        <div class="sync-item p-2.5 rounded-lg" onclick="syncHighlight(4)" onmouseenter="syncHighlight(4)" id="text-line-4">
+                            <h4 class="text-purple-300 font-semibold mb-1 flex items-center gap-1.5">
+                                <i class="fa-solid fa-compass text-xs"></i> Our Future Journey
+                            </h4>
+                            <p class="text-slate-300 text-xs leading-normal">
+                                My long-term plan is simple: explore every corner of the world together with you!
+                            </p>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Clean Photo Gallery Cards -->
+        <section class="space-y-4 pt-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-images text-pink-400 text-sm"></i> Favorite Memories
+                    </h3>
+                    <p class="text-xs text-slate-400">Captured sweet moments together</p>
+                </div>
+            </div>
+
+            <!-- 5 Photo Cards Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                
+                <!-- Photo 1 -->
+                <div class="glass-card glass-card-hover rounded-xl p-2.5 flex flex-col justify-between">
+                    <div class="relative overflow-hidden rounded-lg aspect-[4/3] bg-slate-900 mb-2">
+                        <!-- REPLACE BELOW SRC WITH YOUR REAL IMAGE PATH IF NEEDED -->
+                        <img src="WhatsApp Image 2026-09-30 at 13.21.43 (1).jpeg" alt="Memory 1" class="w-full h-full object-cover transition duration-300 hover:scale-105" onerror="this.onerror=null; this.src='https://placehold.co/600x450/1e1b2e/f472b6?text=Nishmi+%26+Me+❤️';">
+                    </div>
+                    <div class="px-1 py-1">
+                        <span class="text-xs font-semibold text-pink-300">Cheek Kisses 💕</span>
+                        <p class="text-[11px] text-slate-400 mt-0.5">Your warmth makes every day brighter.</p>
+                    </div>
+                </div>
+
+                <!-- Photo 2 -->
+                <div class="glass-card glass-card-hover rounded-xl p-2.5 flex flex-col justify-between">
+                    <div class="relative overflow-hidden rounded-lg aspect-[4/3] bg-slate-900 mb-2">
+                        <img src="WhatsApp Image 2026-09-30 at 13.21.43.jpeg" alt="Memory 2" class="w-full h-full object-cover transition duration-300 hover:scale-105" onerror="this.onerror=null; this.src='https://placehold.co/600x450/1e1b2e/f472b6?text=Cozy+Moments+✨';">
+                    </div>
+                    <div class="px-1 py-1">
+                        <span class="text-xs font-semibold text-pink-300">Quiet Moments ☕</span>
+                        <p class="text-[11px] text-slate-400 mt-0.5">Even simple peaceful moments feel special with you.</p>
+                    </div>
+                </div>
+
+                <!-- Photo 3 -->
+                <div class="glass-card glass-card-hover rounded-xl p-2.5 flex flex-col justify-between">
+                    <div class="relative overflow-hidden rounded-lg aspect-[4/3] bg-slate-900 mb-2">
+                        <img src="WhatsApp Image 2026-09-30 at 13.21.08.jpeg" alt="Memory 3" class="w-full h-full object-cover transition duration-300 hover:scale-105" onerror="this.onerror=null; this.src='https://placehold.co/600x450/1e1b2e/f472b6?text=Beautiful+Smiles+😊';">
+                    </div>
+                    <div class="px-1 py-1">
+                        <span class="text-xs font-semibold text-pink-300">Pure Smile 😄</span>
+                        <p class="text-[11px] text-slate-400 mt-0.5">Your smile is literally my favorite view.</p>
+                    </div>
+                </div>
+
+                <!-- Photo 4 -->
+                <div class="glass-card glass-card-hover rounded-xl p-2.5 flex flex-col justify-between">
+                    <div class="relative overflow-hidden rounded-lg aspect-[4/3] bg-slate-900 mb-2">
+                        <img src="WhatsApp Image 2026-09-30 at 13.21.06 (1).jpeg" alt="Memory 4" class="w-full h-full object-cover transition duration-300 hover:scale-105" onerror="this.onerror=null; this.src='https://placehold.co/600x450/1e1b2e/f472b6?text=Sweet+Affection+💋';">
+                    </div>
+                    <div class="px-1 py-1">
+                        <span class="text-xs font-semibold text-pink-300">Sweet Affection 💋</span>
+                        <p class="text-[11px] text-slate-400 mt-0.5">Forever grateful for your love and hugs.</p>
+                    </div>
+                </div>
+
+                <!-- Photo 5 -->
+                <div class="glass-card glass-card-hover rounded-xl p-2.5 flex flex-col justify-between sm:col-span-2 lg:col-span-1">
+                    <div class="relative overflow-hidden rounded-lg aspect-[4/3] bg-slate-900 mb-2">
+                        <img src="WhatsApp Image 2026-09-30 at 13.21.06.jpeg" alt="Memory 5" class="w-full h-full object-cover transition duration-300 hover:scale-105" onerror="this.onerror=null; this.src='https://placehold.co/600x450/1e1b2e/f472b6?text=Fun+Together+🎉';">
+                    </div>
+                    <div class="px-1 py-1">
+                        <span class="text-xs font-semibold text-pink-300">Cheering Together 🎉</span>
+                        <p class="text-[11px] text-slate-400 mt-0.5">Always on the same team in life!</p>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Executable Birthday Modal -->
+    <div id="wishModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-all duration-300">
+        <div id="wishModalCard" class="max-w-md w-full glass-card rounded-2xl p-6 border border-pink-500/40 shadow-2xl text-center transform scale-95 transition-all duration-300 relative">
+            
+            <div class="w-16 h-16 bg-pink-500/10 border border-pink-500/30 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl text-pink-400">
+                🎂
+            </div>
+
+            <span class="text-[10px] font-mono text-pink-400 uppercase tracking-widest">// PROGRAM_STATUS: SUCCESS</span>
+            <h3 class="text-2xl font-bold text-white mt-1 mb-2">Happy Birthday Nishmi! ❤️</h3>
+
+            <p class="text-slate-300 text-xs md:text-sm leading-relaxed mb-4">
+                "You don't need to read line-by-line code to know how much I love you. May this year bring you endless happiness, smiles, and laughter!"
+            </p>
+
+            <div class="bg-slate-900/80 p-3 rounded-xl border border-white/10 text-left font-mono text-[11px] text-pink-300 space-y-1 mb-5">
+                <div>✓ Love Level: 100% (Maximum)</div>
+                <div>✓ Lifetime Pass: Unlimited Hugs</div>
+                <div>✓ Bug Count: 0 (You are perfect)</div>
+            </div>
+
+            <button onclick="closeLoveProgram()" class="w-full py-2.5 bg-gradient-to-r from-pink-500 to-purple-600 hover:opacity-90 text-white font-semibold rounded-xl text-xs transition cursor-pointer">
+                Close & Give Me A Hug 🤗
+            </button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="relative z-10 border-t border-white/10 glass-card py-4 text-center text-xs text-slate-400">
+        <p>Crafted with <i class="fa-solid fa-heart text-pink-500 text-[10px]"></i> for <span class="text-pink-300 font-medium">Nishmi</span></p>
+    </footer>
+
+    <script>
+        // Synchronized Code-to-Text Line Highlighting
+        function syncHighlight(index) {
+            for (let i = 1; i <= 4; i++) {
+                const codeEl = document.getElementById(`code-line-${i}`);
+                const textEl = document.getElementById(`text-line-${i}`);
+                
+                if (codeEl) codeEl.classList.remove('active-sync');
+                if (textEl) textEl.classList.remove('active-sync');
+            }
+
+            const currentCode = document.getElementById(`code-line-${index}`);
+            const currentText = document.getElementById(`text-line-${index}`);
+
+            if (currentCode) currentCode.classList.add('active-sync');
+            if (currentText) currentText.classList.add('active-sync');
+        }
+
+        // Default highlight line 1
+        syncHighlight(1);
+
+        // Mobile View Tab Switcher
+        function switchMobileTab(tab) {
+            const codeContainer = document.getElementById('codeTabContainer');
+            const textContainer = document.getElementById('textTabContainer');
+            const tabCodeBtn = document.getElementById('tabCodeBtn');
+            const tabTextBtn = document.getElementById('tabTextBtn');
+
+            if (tab === 'code') {
+                codeContainer.classList.remove('hidden');
+                textContainer.classList.add('hidden');
+                tabCodeBtn.className = "flex-1 py-2 text-center rounded-lg bg-pink-500/20 text-pink-300 font-semibold transition";
+                tabTextBtn.className = "flex-1 py-2 text-center rounded-lg text-slate-400 font-semibold transition";
+            } else {
+                textContainer.classList.remove('hidden');
+                codeContainer.classList.add('hidden');
+                tabTextBtn.className = "flex-1 py-2 text-center rounded-lg bg-pink-500/20 text-pink-300 font-semibold transition";
+                tabCodeBtn.className = "flex-1 py-2 text-center rounded-lg text-slate-400 font-semibold transition";
+            }
+        }
+
+        // Audio Player Controls
+        const bgAudio = document.getElementById('bgAudio');
+        const playBtn = document.getElementById('playBtn');
+        const playIcon = document.getElementById('playIcon');
+        const audioStatus = document.getElementById('audioStatus');
+        const waveBars = document.querySelectorAll('.wave-bar');
+        let isAudioPlaying = false;
+
+        function toggleAudio() {
+            if (isAudioPlaying) {
+                bgAudio.pause();
+                playIcon.className = "fa-solid fa-play text-xs";
+                audioStatus.innerText = "Click play";
+                waveBars.forEach(bar => bar.classList.add('wave-paused'));
+                isAudioPlaying = false;
+            } else {
+                bgAudio.play().then(() => {
+                    playIcon.className = "fa-solid fa-pause text-xs text-pink-300";
+                    audioStatus.innerText = "Playing song 🎵";
+                    waveBars.forEach(bar => bar.classList.remove('wave-paused'));
+                    isAudioPlaying = true;
+                }).catch(() => {
+                    audioStatus.innerText = "Audio blocked";
+                });
+            }
+        }
+
+        // Celebrate Action Modal & Confetti
+        function triggerLoveProgram() {
+            const modal = document.getElementById('wishModal');
+            const card = document.getElementById('wishModalCard');
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            card.classList.remove('scale-95');
+            card.classList.add('scale-100');
+
+            if (typeof confetti === 'function') {
+                confetti({
+                    particleCount: 80,
+                    spread: 60,
+                    origin: { y: 0.6 }
+                });
+            }
+        }
+
+        function closeLoveProgram() {
+            const modal = document.getElementById('wishModal');
+            const card = document.getElementById('wishModalCard');
+            card.classList.remove('scale-100');
+            card.classList.add('scale-95');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+        }
+
+        // Subtle Floating Hearts Background
+        const canvas = document.getElementById('bgCanvas');
+        const ctx = canvas.getContext('2d');
+        let hearts = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class HeartParticle {
+            constructor() {
+                this.reset();
+            }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = canvas.height + 20;
+                this.size = Math.random() * 8 + 6;
+                this.speedY = Math.random() * 0.8 + 0.3;
+                this.speedX = Math.sin(Math.random() * Math.PI) * 0.4;
+                this.opacity = Math.random() * 0.3 + 0.1;
+            }
+            update() {
+                this.y -= this.speedY;
+                this.x += this.speedX;
+                if (this.y < -20) this.reset();
+            }
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.opacity;
+                ctx.fillStyle = '#f472b6';
+                ctx.beginPath();
+                ctx.translate(this.x, this.y);
+                ctx.scale(this.size / 10, this.size / 10);
+                ctx.moveTo(0, 0);
+                ctx.bezierCurveTo(-5, -5, -10, 0, 0, 10);
+                ctx.bezierCurveTo(10, 0, 5, -5, 0, 0);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        for (let i = 0; i < 20; i++) {
+            hearts.push(new HeartParticle());
+        }
+
+        function renderParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            hearts.forEach(h => {
+                h.update();
+                h.draw();
+            });
+            requestAnimationFrame(renderParticles);
+        }
+        renderParticles();
+    </script>
+</body>
+</html>
